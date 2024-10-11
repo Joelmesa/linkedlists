@@ -1,0 +1,178 @@
+public class TrainLine {
+
+    private static final int MAX_LINE_LENGTH = 80;  // Maximum number of characters per line
+
+    private String name;
+    private TrainStation head;
+    private TrainStation tail;
+    private int numberOfStations;
+
+    // Full constructor
+    public TrainLine(String name, TrainStation head) {
+        this.name = name;
+        this.head = head;
+        this.numberOfStations = (head != null) ? 1 : 0;
+        this.tail = head;
+    }
+
+    // Basic constructor
+    public TrainLine(String name) {
+        this(name, null);
+    }
+
+    // Method to add a new station at the end of the line
+    public void add(String name) {
+        TrainStation newStation = new TrainStation(name);
+        boolean isEmptyLine = (this.head == null);
+
+        if (isEmptyLine) {
+            this.head = newStation;
+        } else {
+            this.tail.setNext(newStation);
+        }
+
+        this.tail = newStation;
+        this.numberOfStations++;
+    }
+
+    // Method to insert a new station at the specified position
+    public void insert(String name, int position) {
+        boolean invalidPosition = (position < 0);
+        if (invalidPosition) {
+            return;
+        }
+
+        TrainStation newStation = new TrainStation(name);
+
+        // If position is 0, insert at the head
+        if (position == 0) {
+            newStation.setNext(this.head);
+            this.head = newStation;
+            boolean isTailNull = (this.tail == null);
+            if (isTailNull) {
+                this.tail = newStation;
+            }
+            this.numberOfStations++;
+            return;
+        }
+
+        TrainStation current = this.head;
+        int currentIndex = 0;
+
+        // Traverse the list to find the correct position
+        while (current != null && currentIndex < position - 1) {
+            current = current.getNext();
+            currentIndex++;
+        }
+
+        // If current is not null, insert new station after current
+        boolean canInsert = (current != null);
+        if (canInsert) {
+            newStation.setNext(current.getNext());
+            current.setNext(newStation);
+            boolean isNewStationTail = (newStation.getNext() == null);
+            if (isNewStationTail) {
+                this.tail = newStation;
+            }
+            this.numberOfStations++;
+        }
+    }
+
+    // Method to return a snake-like string representation of the train line
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        TrainStation current = this.head;
+        int lineLength = 0;
+        boolean leftToRight = true;  // Controls the direction of the arrows
+        boolean firstLine = true;    // To track if it's the first line
+
+        while (current != null) {
+            String station;
+
+            // Construct the station string with appropriate arrows based on direction
+            if (leftToRight) {
+                station = current.getName() + " --> ";
+            } else {
+                station = "<-- " + current.getName() + " ";
+            }
+
+            // Check if adding this station exceeds the MAX_LINE_LENGTH, wrap the line if it does
+            if (lineLength + station.length() > MAX_LINE_LENGTH) {
+                if (firstLine) {
+                    sb.append("--+\n");  // First line break
+                    firstLine = false;
+                } else {
+                    sb.append("+\n");
+                }
+
+                // The next station should continue down to the next in order
+                if (leftToRight) {
+                    sb.append("      |\n");  // Align the next station below
+                } else {
+                    sb.append("                                                                     |\n");
+                }
+
+                lineLength = 0; // Reset line length for new line
+                leftToRight = !leftToRight; // Flip the direction for the next line
+            }
+
+            sb.append(station);
+            lineLength += station.length();
+            current = current.getNext();
+        }
+
+        // Add null at the end, with correct alignment for the last line
+        if (leftToRight) {
+            sb.append("null\n");
+        } else {
+            sb.append("null\n");
+            sb.append("                                                                     +\n");
+        }
+
+        return sb.toString();
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        String[] stationNames = { "Howard", "Jarvis", "Morse", "Loyola", "Granville", "Thorndale", 
+                                  "Addison", "Sheridan", "Wilson", "Argyle", "Bryn Mawr",
+                                  "Belmont", "Fullerton", "North/Clybourn", "Clark/Division",
+                                  "Roosevelt", "Harrison", "Jackson", "Monroe", "Clark", "Chicago",
+                                  "Cermak-Chinatown", "Sox-35th", "47th", "Garfield", "63rd", "69th",
+                                  "95th/Dan Ryan", "87th", "79th" };
+        TrainLine redLineSB = new TrainLine("Red Line SB");
+        for (String station : stationNames) {
+            redLineSB.add(station);
+        }
+
+        System.out.println("TrainLine in snake pattern:");
+        System.out.println(redLineSB.toString());
+    }
+}
+
+class TrainStation {
+
+    private String name;
+    private TrainStation next;
+
+    public TrainStation(String name) {
+        this.name = name;
+        this.next = null;
+    }
+
+    public void setNext(TrainStation next) {
+        this.next = next;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public boolean hasNext() {
+        return this.next != null;
+    }
+
+    public TrainStation getNext() {
+        return this.next;
+    }
+}
